@@ -1,9 +1,15 @@
 package ru.mark.sprint4;
 
+import java.util.Objects;
+
 /**
  * Задача.
  */
 public class Task {
+    /**
+     * Уникальный идентификатор задачи.
+     */
+    private int id;
     /**
      * Наименование задачи.
      */
@@ -12,10 +18,6 @@ public class Task {
      * Описание задачи.
      */
     private String description;
-    /**
-     * Уникальный идентификатор задачи.
-     */
-    private int id;
 
     public Task(int id, String name, String description) {
         this.name = name;
@@ -45,5 +47,27 @@ public class Task {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
