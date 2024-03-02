@@ -73,4 +73,15 @@ public class Epic extends Task {
         subtasks.remove(subtaskId);
         checkStatus();
     }
+
+    @Override
+    public String toString() {
+        return "Epic{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", subtasks=" + subtasks.values() +
+                '}';
+    }
 }
