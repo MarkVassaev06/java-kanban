@@ -1,5 +1,11 @@
 package ru.mark.sprint4;
 
+import ru.mark.sprint4.manager.TaskManager;
+import ru.mark.sprint4.models.Epic;
+import ru.mark.sprint4.models.Status;
+import ru.mark.sprint4.models.Subtask;
+import ru.mark.sprint4.models.Task;
+
 import java.util.Collection;
 
 public class Main {
@@ -33,12 +39,12 @@ public class Main {
 
         print("Только что созданные", taskManager);
 
-        task1.status = Status.DONE;
-        task2.status = Status.IN_PROGRESS;
+        task1.setStatus(Status.DONE);
+        task2.setStatus(Status.IN_PROGRESS);
 
-        subtask12.status = Status.DONE;
-        subtask11.status = Status.DONE;
-        subtask21.status = Status.IN_PROGRESS;
+        subtask12.setStatus(Status.DONE);
+        subtask11.setStatus(Status.DONE);
+        subtask21.setStatus(Status.IN_PROGRESS);
 
         print("Сменили статусы", taskManager);
 

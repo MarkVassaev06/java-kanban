@@ -1,7 +1,8 @@
-package ru.mark.sprint4;
+package ru.mark.sprint4.models;
 
 /**
  * Подзадача, входит в эпику {@link Epic}.
+ * Знание об эпике, в которую входит подзадача, не требуется.
  */
 public class Subtask extends Task {
 

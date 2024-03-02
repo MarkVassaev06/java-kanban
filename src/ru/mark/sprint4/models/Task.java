@@ -1,4 +1,4 @@
-package ru.mark.sprint4;
+package ru.mark.sprint4.models;
 
 import java.util.Objects;
 

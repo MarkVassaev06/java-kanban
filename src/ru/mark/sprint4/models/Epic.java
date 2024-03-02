@@ -1,12 +1,13 @@
-package ru.mark.sprint4;
+package ru.mark.sprint4.models;
 
 import java.util.*;
 
 /**
- * Эпика, включает в себя множество задач {@link Subtask}.
+ * Эпик, включает в себя множество задач {@link Subtask}.
  */
 public class Epic extends Task {
 
+    //Список подзадач. Выбрана концепция знания родителя о своих детях, принадлежность подзадачи эпике не требовалась.
     private Map<Integer, Subtask> subtasks;
 
     public Epic(int id, String name, String description) {
