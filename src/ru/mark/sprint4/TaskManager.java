@@ -50,7 +50,7 @@ public class TaskManager {
      *
      * @param epicId id эпики
      */
-    public Collection<Subtask> getSubtaskByEpicId(int epicId) {
+    public Collection<Subtask> getSubtasksByEpicId(int epicId) {
         Epic epic = epics.get(epicId);
         if (epic != null) {
             return epic.getAllSubtasks();
@@ -214,6 +214,7 @@ public class TaskManager {
             Map<Integer, Subtask> subtasks = epic.getSubtasks();
             if (subtasks.containsKey(subtaskId)) {
                 subtasks.remove(subtaskId);
+                epic.removeSubtask(subtaskId);
                 return true;
             }
         }

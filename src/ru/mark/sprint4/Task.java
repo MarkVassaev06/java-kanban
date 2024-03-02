@@ -24,10 +24,15 @@ public class Task {
      */
     protected Status status;
 
-    public Task(int id, String name, String description, Status status) {
+    public Task(int id, String name, String description) {
+        this.id = id;
         this.name = name;
         this.description = description;
-        this.id = id;
+        status = Status.NEW;
+    }
+
+    public Task(int id, String name, String description, Status status) {
+        this(id, name, description);
         this.status = status;
     }
 
