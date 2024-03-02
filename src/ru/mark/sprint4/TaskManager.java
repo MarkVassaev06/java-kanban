@@ -163,7 +163,7 @@ public class TaskManager {
             //Передан неверный идентификатор эпики. Некуда добавлять подзадачу.
             return false;
         } else {
-            epic.getSubtasks().put(subtask.getId(), subtask);
+            epic.addSubTasks(subtask);
             return true;
         }
     }
@@ -185,7 +185,6 @@ public class TaskManager {
         }
         return false;
     }
-
 
     /**
      * Удаление задачи по идентификатору.

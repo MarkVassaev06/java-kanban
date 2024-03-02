@@ -9,20 +9,34 @@ public class Task {
     /**
      * Уникальный идентификатор задачи.
      */
-    private int id;
+    protected int id;
     /**
      * Наименование задачи.
      */
-    private String name;
+    protected String name;
     /**
      * Описание задачи.
      */
-    private String description;
+    protected String description;
 
-    public Task(int id, String name, String description) {
+    /**
+     * Статус задачи.
+     */
+    protected Status status;
+
+    public Task(int id, String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.id = id;
+        this.status = status;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public String getName() {

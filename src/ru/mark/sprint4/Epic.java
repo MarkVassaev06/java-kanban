@@ -11,9 +11,10 @@ public class Epic extends Task {
 
     private Map<Integer, Subtask> subtasks;
 
-    public Epic(int id, String name, String description) {
-        super(id, name, description);
+    public Epic(int id, String name, String description, Status status) {
+        super(id, name, description, status);
         subtasks = new HashMap<>();
+        this.status = Status.NEW;
     }
 
     /**
@@ -21,6 +22,18 @@ public class Epic extends Task {
      */
     public void addSubTasks(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
+        boolean done = true;
+        for (Subtask item : subtasks.values()) {
+            done = done && item.status == Status.DONE;
+            if (!done) {
+                break;
+            }
+        }
+        if (done) {
+            status = Status.DONE;
+        } else {
+            status = Status.IN_PROGRESS;
+        }
     }
 
     /**
@@ -28,6 +41,7 @@ public class Epic extends Task {
      */
     public void clearSubtasks() {
         subtasks.clear();
+        status = Status.NEW;
     }
 
     /**
