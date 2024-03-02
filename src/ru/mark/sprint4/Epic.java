@@ -1,8 +1,6 @@
 package ru.mark.sprint4;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Эпика, включает в себя множество задач {@link Subtask}.
@@ -30,16 +28,23 @@ public class Epic extends Task {
         checkStatus();
     }
 
+    @Override
+    public Status getStatus() {
+        checkStatus();
+        return status;
+    }
+
     private void checkStatus() {
         boolean done = true;
+        boolean isNew = true;
         for (Subtask item : subtasks.values()) {
             done = done && item.status == Status.DONE;
-            if (!done) {
-                break;
-            }
+            isNew = isNew && item.status == Status.NEW;
         }
         if (done) {
             status = Status.DONE;
+        } else if (isNew) {
+            status = Status.NEW;
         } else {
             status = Status.IN_PROGRESS;
         }
@@ -76,12 +81,18 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
+        checkStatus();
+        List<String> subTaskStr = new ArrayList<>();
+        for (Subtask value : subtasks.values()) {
+            subTaskStr.add(value.toString());
+        }
         return "Epic{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", status=" + status +
-                ", subtasks=" + subtasks.values() +
-                '}';
+                ", status=" + getStatus() +
+                ", \nsubtasks=\n" + String.join("\n", subTaskStr) +
+                "\n}\n";
     }
+
 }
