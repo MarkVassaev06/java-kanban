@@ -21,21 +21,15 @@ public class Main {
         //а также эпик с двумя подзадачами и эпик с одной подзадачей.
         Epic epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
         taskManager.addEpic(epic1);
-        Subtask subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11");
-        taskManager.addSubtask(
-                epic1.getId(),
-                subtask11);
-        Subtask subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12");
-        taskManager.addSubtask(
-                epic1.getId(),
-                subtask12);
+        Subtask subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
+        taskManager.addSubtask(subtask11);
+        Subtask subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
+        taskManager.addSubtask(subtask12);
 
         Epic epic2 = new Epic(taskManager.nextTaskId(), "epic2", "epicDescription2");
         taskManager.addEpic(epic2);
-        Subtask subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21");
-        taskManager.addSubtask(
-                epic2.getId(),
-                subtask21);
+        Subtask subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21", epic2.getId());
+        taskManager.addSubtask(subtask21);
 
         print("Только что созданные", taskManager);
 
