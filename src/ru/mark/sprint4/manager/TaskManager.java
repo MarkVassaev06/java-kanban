@@ -25,21 +25,21 @@ public class TaskManager {
     }
 
     /**
-     * Получение списка всех задач.
+     * Первый метод получения списка всех задач.
      */
-    public Collection<Task> getTasks() {
-        return tasks.values();
+    public List<Task> getTasks() {
+        return Collections.unmodifiableList(new ArrayList<>(tasks.values()));
     }
 
     /**
-     * Получение списка всех эпик.
+     * Второй метод получения списка всех эпик.
      */
-    public Collection<Epic> getEpics() {
-        return epics.values();
+    public List<Epic> getEpics() {
+        return Collections.unmodifiableList(new ArrayList<>(epics.values()));
     }
 
     /**
-     * Получить все подзадачи всех эпик.
+     * Третий метод получения всех подзадач.
      */
     public List<Subtask> getAllSubtask() {
         List<Subtask> result = new ArrayList<>();
@@ -50,11 +50,11 @@ public class TaskManager {
     }
 
     /**
-     * Получение подзадач эпики.
+     * Получение всех подзадач эпики.
      *
      * @param epicId id эпики
      */
-    public Collection<Subtask> getSubtasksByEpicId(int epicId) {
+    public List<Subtask> getSubtasksByEpicId(int epicId) {
         Epic epic = epics.get(epicId);
         if (epic != null) {
             return epic.getAllSubtasks();
@@ -78,14 +78,26 @@ public class TaskManager {
     }
 
     /**
-     * Удаление всех подзадач эпики.
+     * Удаление всех подзадач всех эпик.
      */
-    public void removeAllSubtasksFromEpic(Epic epic) {
-        epic.clearSubtasks();
+    public void removeAllSubtasks() {
+        for (Epic epic : epics.values()) {
+            epic.clearSubtasks();
+        }
     }
 
     /**
-     * Запрос задачи по идентификатору.
+     * Удаление всех подзадач эпики.
+     */
+    public void removeAllSubtasksFromEpic(int epicId) {
+        Epic epic = getEpicById(epicId);
+        if (epic != null) {
+            epic.clearSubtasks();
+        }
+    }
+
+    /**
+     * Получить задачу по идентификатору.
      *
      * @param taskId id задачи
      */
@@ -94,7 +106,7 @@ public class TaskManager {
     }
 
     /**
-     * Получить эпику по идентификатору.
+     * Получить эпик по идентификатору.
      *
      * @param epicId id эпики
      */
@@ -158,11 +170,10 @@ public class TaskManager {
     /**
      * Добавить подзадачу в эпику.
      *
-     * @param epicId  id эпики
      * @param subtask подзадача эпики
      */
-    public boolean addSubtask(int epicId, Subtask subtask) {
-        Epic epic = epics.get(epicId);
+    public boolean addSubtask(Subtask subtask) {
+        Epic epic = epics.get(subtask.getEpicId());
         if (epic == null) {
             //Передан неверный идентификатор эпики. Некуда добавлять подзадачу.
             return false;
@@ -178,16 +189,8 @@ public class TaskManager {
      * @param subtask подзадача эпики
      */
     public boolean updateSubtask(Subtask subtask) {
-        for (Epic epic : epics.values()) {
-            Map<Integer, Subtask> subtasks = epic.getSubtasks();
-            Subtask oldSubtask = subtasks.get(subtask.getId());
-            //Обновление - замена чего-то существующего. Для добавления есть отдельный метод.
-            if (oldSubtask != null) {
-                subtasks.put(subtask.getId(), subtask);
-                return true;
-            }
-        }
-        return false;
+        //Структуры хранения данных позволяют добавление совместить с обновлением.
+        return addSubtask(subtask);
     }
 
     /**

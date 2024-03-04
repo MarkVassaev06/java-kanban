@@ -4,21 +4,23 @@ import java.util.*;
 
 /**
  * Эпик, включает в себя множество задач {@link Subtask}.
+ * Решений одной задачи может быть много.
+ * Хранение списка id подзадач требует вынести хранение самого списка куда-то в другое место.
+ * Вероятно в TaskManager... Это сильно усложнит решение.
+ * Эпик содержит подзадачи, TaskManager лишь обращается к методам Epic.
+ * Из ТЗ: "Каждый эпик знает, какие подзадачи в него входят.".
  */
 public class Epic extends Task {
 
     //Список подзадач. Выбрана концепция знания родителя о своих детях, принадлежность подзадачи эпике не требовалась.
     private Map<Integer, Subtask> subtasks;
+    //protected здесь неуместен, поскольку никто класс Epic не наследует.
+    //Комментарий: "Достаточно хранить только список id..."
+    //Ответ: Эпик содержит подзадачи и является владельцем подзадач.
 
     public Epic(int id, String name, String description) {
         super(id, name, description);
         subtasks = new HashMap<>();
-    }
-
-    public Epic(int id, String name, String description, Status status) {
-        super(id, name, description, status);
-        subtasks = new HashMap<>();
-        this.status = Status.NEW;
     }
 
     /**
@@ -26,11 +28,13 @@ public class Epic extends Task {
      */
     public void addSubTasks(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
+        //обновляем статус.
         checkStatus();
     }
 
     @Override
     public Status getStatus() {
+        //вычисляем статус, обновляем.
         checkStatus();
         return status;
     }
@@ -55,19 +59,21 @@ public class Epic extends Task {
      * Очищаем список подзадач эпики.
      */
     public void clearSubtasks() {
+        //Очищаем список подзадач.
         subtasks.clear();
+        //обновляем статус.
         status = Status.NEW;
     }
 
     /**
      * Список подзадач эпики.
      */
-    public Collection<Subtask> getAllSubtasks() {
-        return subtasks.values();
+    public List<Subtask> getAllSubtasks() {
+        return Collections.unmodifiableList(new ArrayList<>(subtasks.values()));
     }
 
     public Map<Integer, Subtask> getSubtasks() {
-        return subtasks;
+        return Collections.unmodifiableMap(subtasks);
     }
 
     /**
@@ -77,6 +83,7 @@ public class Epic extends Task {
      */
     public void removeSubtask(int subtaskId) {
         subtasks.remove(subtaskId);
+        //обновляем статус.
         checkStatus();
     }
 
