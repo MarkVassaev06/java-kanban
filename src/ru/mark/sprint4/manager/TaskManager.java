@@ -220,7 +220,6 @@ public class TaskManager {
         for (Epic epic : epics.values()) {
             Map<Integer, Subtask> subtasks = epic.getSubtasks();
             if (subtasks.containsKey(subtaskId)) {
-                subtasks.remove(subtaskId);
                 epic.removeSubtask(subtaskId);
                 return true;
             }
