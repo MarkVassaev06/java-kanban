@@ -1,5 +1,6 @@
 package ru.mark.sprint4;
 
+import ru.mark.sprint4.manager.InMemoryTaskManager;
 import ru.mark.sprint4.manager.TaskManager;
 import ru.mark.sprint4.models.Epic;
 import ru.mark.sprint4.models.Status;
@@ -11,7 +12,7 @@ import java.util.Collection;
 public class Main {
 
     public static final void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = new InMemoryTaskManager();
         //Создайте две задачи,
         Task task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
         taskManager.addTask(task1);

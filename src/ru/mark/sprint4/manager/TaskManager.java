@@ -4,71 +4,40 @@ import ru.mark.sprint4.models.Epic;
 import ru.mark.sprint4.models.Subtask;
 import ru.mark.sprint4.models.Task;
 
-import java.util.*;
+import java.util.List;
 
 /**
- * Генератор id подзадач и эпик.
+ * Интерфейс менеджер задач.
  */
-public class TaskManager {
-    private static int taskId = 1;
-
-    private Map<Integer, Task> tasks;
-    private Map<Integer, Epic> epics;
-
-    public TaskManager() {
-        tasks = new HashMap<>();
-        epics = new HashMap<>();
-    }
-
-    public int nextTaskId() {
-        return taskId++;
-    }
+public interface TaskManager {
+    int nextTaskId();
 
     /**
      * Первый метод получения списка всех задач.
      */
-    public List<Task> getTasks() {
-        return Collections.unmodifiableList(new ArrayList<>(tasks.values()));
-    }
+    List<Task> getTasks();
 
     /**
      * Второй метод получения списка всех эпик.
      */
-    public List<Epic> getEpics() {
-        return Collections.unmodifiableList(new ArrayList<>(epics.values()));
-    }
+    List<Epic> getEpics();
 
     /**
      * Третий метод получения всех подзадач.
      */
-    public List<Subtask> getAllSubtask() {
-        List<Subtask> result = new ArrayList<>();
-        for (Epic epic : epics.values()) {
-            result.addAll(epic.getAllSubtasks());
-        }
-        return result;
-    }
+    List<Subtask> getAllSubtask();
 
     /**
      * Получение всех подзадач эпики.
      *
      * @param epicId id эпики
      */
-    public List<Subtask> getSubtasksByEpicId(int epicId) {
-        Epic epic = epics.get(epicId);
-        if (epic != null) {
-            return epic.getAllSubtasks();
-        } else {
-            return Collections.emptyList();
-        }
-    }
+    List<Subtask> getSubtasksByEpicId(int epicId);
 
     /**
      * 1. Первый метод удаления: удаление всех задач.
      */
-    public void removeAllTasks() {
-        tasks.clear();
-    }
+    void removeAllTasks();
 
     /**
      * 2. Второй метод удаления: удаление всех эпик.
@@ -76,159 +45,99 @@ public class TaskManager {
      * Ровно также, как удаление объекта удаляет все ссылки на поля.
      * Итак: при удалении всех эпиков удаляются все подзадачи и, очевидно, их идентификаторы.
      */
-    public void removeAllEpics() {
-        epics.clear();
-    }
+    void removeAllEpics();
 
     /**
      * 3. Третий метод: удаление всех подзадач. Очевидно, что подзадачи <b>всех</b> эпик.
      */
-    public void removeAllSubtasks() {
-        for (Epic epic : epics.values()) {
-            //здесь же происходит смена статуса эпики на NEW.
-            epic.clearSubtasks();
-        }
-    }
+    void removeAllSubtasks();
 
     /**
      * Удаление всех подзадач эпики.
      */
-    public void removeAllSubtasksFromEpic(int epicId) {
-        Epic epic = getEpicById(epicId);
-        if (epic != null) {
-            epic.clearSubtasks();
-        }
-    }
+    void removeAllSubtasksFromEpic(int epicId);
 
     /**
      * Получить задачу по идентификатору.
      *
      * @param taskId id задачи
      */
-    public Task getTaskById(int taskId) {
-        return tasks.get(taskId);
-    }
+    Task getTaskById(int taskId);
 
     /**
      * Получить эпик по идентификатору.
      *
      * @param epicId id эпики
      */
-    public Epic getEpicById(int epicId) {
-        return epics.get(epicId);
-    }
+    Epic getEpicById(int epicId);
 
     /**
      * Запрос подзадачи по идентификтатору.
      *
      * @param subtaskId id подзадачи
      */
-    public Subtask getSubtaskById(int subtaskId) {
-        for (Epic epic : epics.values()) {
-            Subtask subtask = epic.getSubtasks().get(subtaskId);
-            if (subtask != null) {
-                return subtask;
-            }
-        }
-        return null;
-    }
+    Subtask getSubtaskById(int subtaskId);
 
     /**
      * Добавление задачи.
      *
      * @param task
      */
-    public void addTask(Task task) {
-        tasks.put(task.getId(), task);
-    }
+    void addTask(Task task);
 
     /**
      * Обновление задачи.
      *
      * @param task
      */
-    public void updateTask(Task task) {
-        //Структуры хранения данных позволяют добавление совместить с обновлением.
-        addTask(task);
-    }
+    void updateTask(Task task);
 
     /**
      * Добавление эпики.
      *
      * @param epic
      */
-    public void addEpic(Epic epic) {
-        epics.put(epic.getId(), epic);
-    }
+    void addEpic(Epic epic);
 
     /**
      * Обновление эпики.
      *
      * @param epic
      */
-    public void updateEpic(Epic epic) {
-        //Структуры хранения данных позволяют добавление совместить с обновлением.
-        addEpic(epic);
-    }
+    void updateEpic(Epic epic);
 
     /**
      * Добавить подзадачу в эпику.
      *
      * @param subtask подзадача эпики
      */
-    public boolean addSubtask(Subtask subtask) {
-        Epic epic = epics.get(subtask.getEpicId());
-        if (epic == null) {
-            //Передан неверный идентификатор эпики. Некуда добавлять подзадачу.
-            return false;
-        } else {
-            epic.addSubTasks(subtask);
-            return true;
-        }
-    }
+    boolean addSubtask(Subtask subtask);
 
     /**
      * Обновить подзадачу какой-то эпики.
      *
      * @param subtask подзадача эпики
      */
-    public boolean updateSubtask(Subtask subtask) {
-        //Структуры хранения данных позволяют добавление совместить с обновлением.
-        return addSubtask(subtask);
-    }
+    boolean updateSubtask(Subtask subtask);
 
     /**
      * Удаление задачи по идентификатору.
      *
      * @param taskId id задачи
      */
-    public boolean removeTaskById(int taskId) {
-        return tasks.remove(taskId) != null;
-    }
+    boolean removeTaskById(int taskId);
 
     /**
      * Удаление эпики по идентификатору.
      *
      * @param epicId id эпики
      */
-    public boolean removeEpicById(int epicId) {
-        return epics.remove(epicId) != null;
-    }
+    boolean removeEpicById(int epicId);
 
     /**
      * Удаление подзадачи по идентификатору.
      *
      * @param subtaskId id подзадачи
      */
-    public boolean removeSubtaskById(int subtaskId) {
-        for (Epic epic : epics.values()) {
-            Map<Integer, Subtask> subtasks = epic.getSubtasks();
-            if (subtasks.containsKey(subtaskId)) {
-                epic.removeSubtask(subtaskId);
-                return true;
-            }
-        }
-        return false;
-    }
-
+    boolean removeSubtaskById(int subtaskId);
 }
