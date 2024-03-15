@@ -1,37 +1,53 @@
-package ru.mark.sprint4;
+package ru.mark.sprint5;
 
-import ru.mark.sprint4.manager.InMemoryTaskManager;
-import ru.mark.sprint4.manager.TaskManager;
-import ru.mark.sprint4.models.Epic;
-import ru.mark.sprint4.models.Status;
-import ru.mark.sprint4.models.Subtask;
-import ru.mark.sprint4.models.Task;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import ru.mark.sprint5.manager.InMemoryTaskManager;
+import ru.mark.sprint5.manager.TaskManager;
+import ru.mark.sprint5.models.Epic;
+import ru.mark.sprint5.models.Status;
+import ru.mark.sprint5.models.Subtask;
+import ru.mark.sprint5.models.Task;
 
 import java.util.Collection;
 
 public class Main {
 
-    public static final void main(String[] args) {
-        TaskManager taskManager = new InMemoryTaskManager();
+    private static TaskManager taskManager;
+    private static Task task1;
+    private static Task task2;
+
+    private static Epic epic1;
+    private static Subtask subtask11;
+    private static Subtask subtask12;
+    private static Epic epic2;
+    private static Subtask subtask21;
+
+    @BeforeAll
+    static void fillTasks() {
+        taskManager = new InMemoryTaskManager();
         //Создайте две задачи,
-        Task task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
+        task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
         taskManager.addTask(task1);
-        Task task2 = new Task(taskManager.nextTaskId(), "task2", "description2");
+        task2 = new Task(taskManager.nextTaskId(), "task2", "description2");
         taskManager.addTask(task2);
 
         //а также эпик с двумя подзадачами и эпик с одной подзадачей.
-        Epic epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
+        epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
         taskManager.addEpic(epic1);
-        Subtask subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
+        subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
         taskManager.addSubtask(subtask11);
-        Subtask subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
+        subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
         taskManager.addSubtask(subtask12);
 
-        Epic epic2 = new Epic(taskManager.nextTaskId(), "epic2", "epicDescription2");
+        epic2 = new Epic(taskManager.nextTaskId(), "epic2", "epicDescription2");
         taskManager.addEpic(epic2);
-        Subtask subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21", epic2.getId());
+        subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21", epic2.getId());
         taskManager.addSubtask(subtask21);
+    }
 
+    @Test
+    void test1() {
         print("Только что созданные", taskManager);
 
         task1.setStatus(Status.DONE);

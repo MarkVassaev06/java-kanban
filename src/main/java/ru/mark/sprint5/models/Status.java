@@ -1,4 +1,4 @@
-package ru.mark.sprint4.models;
+package ru.mark.sprint5.models;
 
 /**
  * Статусы.
