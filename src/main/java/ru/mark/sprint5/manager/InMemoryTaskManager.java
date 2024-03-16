@@ -11,26 +11,20 @@ import java.util.*;
  */
 public class InMemoryTaskManager implements TaskManager {
     private static int taskId = 1;
-    private static final int HISTORY_LIMIT = 10;
 
     private Map<Integer, Task> tasks;
     private Map<Integer, Epic> epics;
-
-    private List<Task> history;
+    private HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         tasks = new HashMap<>();
         epics = new HashMap<>();
+        historyManager = Managers.getDefaultHistory();
     }
 
     @Override
     public int nextTaskId() {
         return taskId++;
-    }
-
-    @Override
-    public List<Task> getHistory() {
-        return history;
     }
 
     /**
@@ -118,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(int taskId) {
         Task task = tasks.get(taskId);
-        addHistory(task);
+        historyManager.add(task);
         return task;
     }
 
@@ -128,7 +122,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpicById(int epicId) {
         Epic epic = epics.get(epicId);
-        addHistory(epic);
+        historyManager.add(epic);
         return epic;
     }
 
@@ -144,17 +138,8 @@ public class InMemoryTaskManager implements TaskManager {
                 break;
             }
         }
-        addHistory(subtask);
+        historyManager.add(subtask);
         return subtask;
-    }
-
-    private void addHistory(Task task) {
-        if (task != null) {
-            history.add(0, task);
-            if (history.size() > HISTORY_LIMIT) {
-                history.remove(HISTORY_LIMIT);
-            }
-        }
     }
 
     /**
