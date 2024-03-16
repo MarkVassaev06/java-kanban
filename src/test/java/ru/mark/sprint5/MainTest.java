@@ -122,7 +122,7 @@ public class MainTest {
         Task task = new Task(task1.getId(), task1.getName() + "new", task1.getDescription() + "new");
         historyManager.add(task);
         List<Task> history = historyManager.getHistory();
-        Assertions.assertEquals(2, history);
+        Assertions.assertEquals(2, history.size());
         Assertions.assertEquals(history.get(0), history.get(1));
         Assertions.assertTrue(
                 history.get(0).getName().endsWith("new") ||
