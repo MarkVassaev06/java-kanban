@@ -23,6 +23,11 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
+    @Override
     public int nextTaskId() {
         return taskId++;
     }

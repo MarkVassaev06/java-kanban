@@ -12,6 +12,8 @@ import java.util.List;
 public interface TaskManager {
     int nextTaskId();
 
+    HistoryManager getHistoryManager();
+
     /**
      * Первый метод получения списка всех задач.
      */

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.mark.sprint5.manager.HistoryManager;
-import ru.mark.sprint5.manager.InMemoryTaskManager;
 import ru.mark.sprint5.manager.Managers;
 import ru.mark.sprint5.manager.TaskManager;
 import ru.mark.sprint5.models.Epic;
@@ -18,6 +17,7 @@ import java.util.List;
 public class MainTest {
 
     private static TaskManager taskManager;
+    private static HistoryManager historyManager;
     private static Task task1;
     private static Task task2;
 
@@ -29,7 +29,12 @@ public class MainTest {
 
     @BeforeAll
     static void fillTasks() {
-        taskManager = new InMemoryTaskManager();
+        taskManager = Managers.getDefault();
+        Assertions.assertNotNull(taskManager);
+
+        historyManager = taskManager.getHistoryManager();
+        Assertions.assertNotNull(historyManager);
+
         //Создайте две задачи,
         task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
         taskManager.addTask(task1);
@@ -48,6 +53,8 @@ public class MainTest {
         taskManager.addEpic(epic2);
         subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21", epic2.getId());
         taskManager.addSubtask(subtask21);
+
+        printAllTasks();
     }
 
     @Test
@@ -104,31 +111,53 @@ public class MainTest {
     @Test
     void managersTest() {
 
-        TaskManager manager = Managers.getDefault();
-        Assertions.assertNotNull(manager);
-
-        manager.addTask(task1);
-        Task taskById = manager.getTaskById(task1.getId());
+        taskManager.addTask(task1);
+        Task taskById = taskManager.getTaskById(task1.getId());
         Assertions.assertEquals(task1, taskById);
+        //Посмотрим, что с историей.
+        printHistory();
 
         Assertions.assertEquals(task1.getName(), taskById.getName());
         Assertions.assertEquals(task1.getDescription(), taskById.getDescription());
         Assertions.assertEquals(task1.getStatus(), taskById.getStatus());
 
-        HistoryManager historyManager = Managers.getDefaultHistory();
-        Assertions.assertNotNull(historyManager);
-
         historyManager.add(task1);
         Task task = new Task(task1.getId(), task1.getName() + "new", task1.getDescription() + "new");
         historyManager.add(task);
         List<Task> history = historyManager.getHistory();
-        Assertions.assertEquals(2, history.size());
+        //одна задача попала в историю при вызове getTaskById, еще 2 - простым добавлением.
+        Assertions.assertEquals(3, history.size());
         Assertions.assertEquals(history.get(0), history.get(1));
         Assertions.assertTrue(
                 history.get(0).getName().endsWith("new") ||
                         history.get(1).getName().endsWith("new")
         );
+        printHistory();
+    }
 
+    private static void printAllTasks() {
+        System.out.println("Задачи:");
+        for (Task task : taskManager.getTasks()) {
+            System.out.println(task);
+        }
+        System.out.println("Эпики:");
+        for (Task epic : taskManager.getEpics()) {
+            System.out.println(epic);
+            for (Task task : taskManager.getSubtasksByEpicId(epic.getId())) {
+                System.out.println("--> " + task);
+            }
+        }
+        System.out.println("Подзадачи:");
+        for (Task subtask : taskManager.getAllSubtask()) {
+            System.out.println(subtask);
+        }
+    }
+
+    private static void printHistory() {
+        System.out.println("История:");
+        for (Task task : historyManager.getHistory()) {
+            System.out.println(task);
+        }
     }
 
 }
