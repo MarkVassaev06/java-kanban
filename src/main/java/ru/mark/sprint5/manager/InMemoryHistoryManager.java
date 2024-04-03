@@ -1,6 +1,6 @@
 package ru.mark.sprint5.manager;
 
-
+import ru.mark.sprint5.models.Node;
 import ru.mark.sprint5.models.Task;
 
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
-    private static final int HISTORY_LIMIT = 10;
 
     private LinkedHashMap<Task> history;
 
@@ -21,19 +20,17 @@ public class InMemoryHistoryManager implements HistoryManager {
     public void add(Task task) {
         if (task != null) {
             history.linkLast(task);
-            if (history.size() > HISTORY_LIMIT) {
-                history.remove(HISTORY_LIMIT);
-            }
         }
-    }
-
-    private void removeNode(Node node) {
-        history.
     }
 
     @Override
     public void remove(int id) {
+        history.removeById(id);
+    }
 
+    @Override
+    public void removeNode(Node<Task> node) {
+        history.remove(node);
     }
 
     /**
@@ -50,7 +47,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         Node<T> first;
         Node<T> last;
 
-        Map<Integer, T> tasks = new HashMap<>();
+        Map<Integer, Node<T>> tasks = new HashMap<>();
 
         public int size() {
             return size;
@@ -66,7 +63,11 @@ public class InMemoryHistoryManager implements HistoryManager {
                 l.next = newNode;
             }
             size++;
-            tasks.put(task.getId(), task);
+            Node<T> prevNode = tasks.get(task.getId());
+            if (prevNode != null) {
+                remove(prevNode);
+            }
+            tasks.put(task.getId(), newNode);
         }
 
         List<T> getTasks() {
@@ -79,18 +80,27 @@ public class InMemoryHistoryManager implements HistoryManager {
             return result;
         }
 
-    }
+        void remove(Node<T> node) {
+            Task task = node.data;
+            //удаляем из мапы ноду
+            tasks.remove(task.getId());
+            Node<T> nextNode = node.next;
+            Node<T> prevNode = node.prev;
+            if (nextNode != null && prevNode != null) {
+                nextNode.prev = prevNode;
+                prevNode.next = nextNode;
+            } else if (nextNode == null) {
+                prevNode.next = null;
+            } else {
+                nextNode.prev = null;
+            }
 
-    public static class Node<T> {
+        }
 
-        private Node prev;
-        private Node next;
-        private T data;
-
-        public Node(T data, Node prev, Node next) {
-            this.prev = prev;
-            this.next = next;
-            this.data = data;
+        public void removeById(int id) {
+            Node<T> node = tasks.get(id);
+            remove(node);
         }
     }
+
 }

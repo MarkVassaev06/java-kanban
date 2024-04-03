@@ -14,6 +14,8 @@ import ru.mark.sprint5.models.Task;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class MainTest {
 
     private static TaskManager taskManager;
@@ -63,42 +65,42 @@ public class MainTest {
 
         List<Task> tasks = taskManager.getTasks();
         Assertions.assertNotNull(tasks);
-        Assertions.assertEquals(2, tasks.size());
+        assertEquals(2, tasks.size());
 
         task1.setStatus(Status.DONE);
         task2.setStatus(Status.IN_PROGRESS);
 
         subtask12.setStatus(Status.DONE);
         subtask11.setStatus(Status.DONE);
-        Assertions.assertEquals(Status.DONE, epic1.getStatus());
+        assertEquals(Status.DONE, epic1.getStatus());
 
         subtask21.setStatus(Status.IN_PROGRESS);
-        Assertions.assertEquals(Status.IN_PROGRESS, epic2.getStatus());
+        assertEquals(Status.IN_PROGRESS, epic2.getStatus());
 
         taskManager.removeSubtaskById(subtask11.getId());
         List<Subtask> subtasks = taskManager.getAllSubtask();
-        Assertions.assertEquals(2, subtasks.size());
+        assertEquals(2, subtasks.size());
     }
 
     @Test
     @DisplayName("Проверки равенства")
     void equalsTest() {
-        Assertions.assertFalse(task1.equals(task2));
-        Assertions.assertFalse(epic1.equals(epic2));
-        Assertions.assertFalse(subtask11.equals(subtask12));
-        Assertions.assertFalse(subtask11.equals(subtask21));
+        assertNotEquals(task1, task2);
+        assertNotEquals(epic1, epic2);
+        assertNotEquals(subtask11, subtask12);
+        assertNotEquals(subtask11, subtask21);
 
         Task t1 = new Task(1, "t1", "d1");
         Task t2 = new Task(1, "t2", "d2");
-        Assertions.assertEquals(t1, t2);
+        assertEquals(t1, t2);
 
         Epic e1 = new Epic(2, "e1", "d1");
         Epic e2 = new Epic(2, "e2", "d2");
-        Assertions.assertEquals(e1, e2);
+        assertEquals(e1, e2);
 
         Subtask s1 = new Subtask(1, "s1", "d1", 1);
         Subtask s2 = new Subtask(1, "s2", "d2", 2);
-        Assertions.assertEquals(s1, s2);
+        assertEquals(s1, s2);
     }
 
     @Test
@@ -113,26 +115,35 @@ public class MainTest {
 
         taskManager.addTask(task1);
         Task taskById = taskManager.getTaskById(task1.getId());
-        Assertions.assertEquals(task1, taskById);
+        assertEquals(task1, taskById);
         //Посмотрим, что с историей.
         printHistory();
 
-        Assertions.assertEquals(task1.getName(), taskById.getName());
-        Assertions.assertEquals(task1.getDescription(), taskById.getDescription());
-        Assertions.assertEquals(task1.getStatus(), taskById.getStatus());
+        assertEquals(task1.getName(), taskById.getName());
+        assertEquals(task1.getDescription(), taskById.getDescription());
+        assertEquals(task1.getStatus(), taskById.getStatus());
 
         historyManager.add(task1);
         Task task = new Task(task1.getId(), task1.getName() + "new", task1.getDescription() + "new");
         historyManager.add(task);
         List<Task> history = historyManager.getHistory();
         //одна задача попала в историю при вызове getTaskById, еще 2 - простым добавлением.
-        Assertions.assertEquals(3, history.size());
-        Assertions.assertEquals(history.get(0), history.get(1));
-        Assertions.assertTrue(
-                history.get(0).getName().endsWith("new") ||
-                        history.get(1).getName().endsWith("new")
-        );
+        assertEquals(3, history.size());
+        assertEquals(history.get(0), history.get(1));
+        assertTrue(history.get(2).getName().endsWith("new"));
         printHistory();
+    }
+
+    /**
+     * 1. Создайте две задачи, эпик с тремя подзадачами и эпик без подзадач.
+     * 2. Запросите созданные задачи несколько раз в разном порядке.
+     * 3. После каждого запроса выведите историю и убедитесь, что в ней нет повторов.
+     * 4. Удалите задачу, которая есть в истории, и проверьте, что при печати она не будет выводиться.
+     * 5. Удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи.
+     */
+    @Test
+    void additionalTest() {
+
     }
 
     private static void printAllTasks() {
