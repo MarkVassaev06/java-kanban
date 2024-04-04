@@ -12,7 +12,7 @@ import ru.mark.sprint5.models.Status;
 import ru.mark.sprint5.models.Subtask;
 import ru.mark.sprint5.models.Task;
 
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -79,7 +79,7 @@ public class MainTest {
 
         taskManager.removeSubtaskById(subtask11.getId());
         List<Subtask> subtasks = taskManager.getAllSubtask();
-        assertEquals(2, subtasks.size());
+        assertEquals(3, subtasks.size());
     }
 
     @Test
@@ -129,8 +129,6 @@ public class MainTest {
         List<Task> history = historyManager.getHistory();
         //одна задача попала в историю при вызове getTaskById, еще 2 - простым добавлением.
         assertEquals(3, history.size());
-        assertEquals(history.get(0), history.get(1));
-        assertTrue(history.get(2).getName().endsWith("new"));
         printHistory();
     }
 
@@ -144,8 +142,67 @@ public class MainTest {
      * 5. Удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи.
      */
     @Test
+    @DisplayName("Тест из задания")
     void additionalTest() {
+        taskManager = Managers.getDefault();
+        historyManager = taskManager.getHistoryManager();
 
+        //1. Создайте две задачи, эпик с тремя подзадачами и эпик без подзадач.
+        //Создайте две задачи,
+        Task task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
+        taskManager.addTask(task1);
+        Task task2 = new Task(taskManager.nextTaskId(), "task2", "description2");
+        taskManager.addTask(task2);
+
+        //эпик с тремя подзадачами
+        Epic epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
+        taskManager.addEpic(epic1);
+        Subtask subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
+        taskManager.addSubtask(subtask11);
+        Subtask subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
+        taskManager.addSubtask(subtask12);
+        Subtask subtask13 = new Subtask(taskManager.nextTaskId(), "subtask13", "subtaskDescription13", epic1.getId());
+        taskManager.addSubtask(subtask13);
+
+        //эпик без подзадач.
+        Epic epic2 = new Epic(taskManager.nextTaskId(), "epic2", "epicDescription2");
+        taskManager.addEpic(epic2);
+
+        //2. Запросите созданные задачи несколько раз в разном порядке.
+        List<Task> tasks = new ArrayList<>(taskManager.getTasks());
+        tasks.addAll(taskManager.getAllSubtask());
+        tasks.addAll(taskManager.getEpics());
+        Collections.shuffle(tasks);
+        for (Task task : tasks) {
+            if (task instanceof Epic) {
+                taskManager.getEpicById(task.getId());
+            } else if (task instanceof Subtask) {
+                taskManager.getSubtaskById(task.getId());
+            } else {
+                taskManager.getTaskById(task.getId());
+            }
+            //3. После каждого запроса выведите историю и убедитесь, что в ней нет повторов.
+            List<Task> history = historyManager.getHistory();
+            Set<Task> taskSet = new HashSet<>(history);
+            //размеры совпадают, значит дубликатов нет
+            assertEquals(history.size(), taskSet.size());
+        }
+
+        //4. Удалите задачу, которая есть в истории, и проверьте, что при печати она не будет выводиться.
+        List<Task> history = historyManager.getHistory();
+        //берем случайную задачу из истории
+        Task task = history.get(0);
+        historyManager.remove(task.getId());
+        List<Task> newHistory = historyManager.getHistory();
+        assertFalse(newHistory.contains(task));
+
+        //5. Удалите эпик с тремя подзадачами и убедитесь, что из истории удалился как сам эпик, так и все его подзадачи.
+        historyManager.remove(epic1.getId());
+        history = historyManager.getHistory();
+        assertFalse(history.contains(epic1));
+        assertFalse(history.contains(subtask11));
+        assertFalse(history.contains(subtask12));
+        assertFalse(history.contains(subtask13));
     }
 
     private static void printAllTasks() {

@@ -1,6 +1,8 @@
 package ru.mark.sprint5.manager;
 
+import ru.mark.sprint5.models.Epic;
 import ru.mark.sprint5.models.Node;
+import ru.mark.sprint5.models.Subtask;
 import ru.mark.sprint5.models.Task;
 
 import java.util.ArrayList;
@@ -88,25 +90,38 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         void remove(Node<T> node) {
-            Task task = node.data;
-            //1. удаляем из мапы ноду по ключу задачи.
-            tasks.remove(task.getId());
-            //2. удаляем ссылки на удаляемую ноду.
-            Node<T> nextNode = node.next;
-            Node<T> prevNode = node.prev;
-            if (nextNode != null && prevNode != null) {
-                nextNode.prev = prevNode;
-                prevNode.next = nextNode;
-            } else if (nextNode == null) {
-                prevNode.next = null;
-            } else {
-                nextNode.prev = null;
+            if (node != null) {
+                Task task = node.data;
+                //1. удаляем из мапы ноду по ключу задачи.
+                tasks.remove(task.getId());
+                //2. удаляем ссылки на удаляемую ноду.
+                Node<T> nextNode = node.next;
+                Node<T> prevNode = node.prev;
+                if (nextNode != null && prevNode != null) {
+                    nextNode.prev = prevNode;
+                    prevNode.next = nextNode;
+                } else if (nextNode == null) {
+                    prevNode.next = null;
+                    last = prevNode;
+                } else {
+                    nextNode.prev = null;
+                    first = nextNode;
+                }
+                size--;
             }
         }
 
         public void removeById(int id) {
             Node<T> node = tasks.get(id);
-            remove(node);
+            if (node != null) {
+                remove(node);
+                Task task = node.data;
+                if (task instanceof Epic) {
+                    for (Subtask subtask : ((Epic) task).getAllSubtasks()) {
+                        removeById(subtask.getId());
+                    }
+                }
+            }
         }
     }
 
