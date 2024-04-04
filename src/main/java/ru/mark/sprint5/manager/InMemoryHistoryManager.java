@@ -10,10 +10,10 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private LinkedHashMap<Task> history;
+    private MyLinkedHashMap<Task> history;
 
     public InMemoryHistoryManager() {
-        history = new LinkedHashMap<>();
+        history = new MyLinkedHashMap<>();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         return List.copyOf(history.getTasks());
     }
 
-    public static class LinkedHashMap<T extends Task> {
+    public static class MyLinkedHashMap<T extends Task> {
         int size = 0;
 
         Node<T> first;
@@ -55,18 +55,25 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         void linkLast(T task) {
             Node l = last;
+            //Вначале создаем ноду
             Node newNode = new Node(task, l, null);
             last = newNode;
+            //создаем ссылку на добавляемую ноду
             if (l == null) {
                 first = newNode;
             } else {
                 l.next = newNode;
             }
+            //увеличиваем размер
             size++;
+            //"следует убедиться, что удаляется предыдущий узел с таким же ID (если он существует), чтобы избежать дублирования"
+            //находим предыдущую ноду по id добавляемой задачи.
             Node<T> prevNode = tasks.get(task.getId());
+            //и, если ссылка существует, то удаляем её.
             if (prevNode != null) {
                 remove(prevNode);
             }
+            //добавляем в карту новую ноду.
             tasks.put(task.getId(), newNode);
         }
 
@@ -82,8 +89,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
         void remove(Node<T> node) {
             Task task = node.data;
-            //удаляем из мапы ноду
+            //1. удаляем из мапы ноду по ключу задачи.
             tasks.remove(task.getId());
+            //2. удаляем ссылки на удаляемую ноду.
             Node<T> nextNode = node.next;
             Node<T> prevNode = node.prev;
             if (nextNode != null && prevNode != null) {
@@ -94,7 +102,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             } else {
                 nextNode.prev = null;
             }
-
         }
 
         public void removeById(int id) {
