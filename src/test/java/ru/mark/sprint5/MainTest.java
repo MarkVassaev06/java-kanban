@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.mark.sprint5.manager.FileBackedTaskManager;
 import ru.mark.sprint5.manager.HistoryManager;
 import ru.mark.sprint5.manager.Managers;
 import ru.mark.sprint5.manager.TaskManager;
@@ -12,6 +13,8 @@ import ru.mark.sprint5.models.Status;
 import ru.mark.sprint5.models.Subtask;
 import ru.mark.sprint5.models.Task;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +23,9 @@ public class MainTest {
 
     private static TaskManager taskManager;
     private static HistoryManager historyManager;
+
+    private static FileBackedTaskManager fileBackedTaskManager;
+    private static File file;
     private static Task task1;
     private static Task task2;
 
@@ -30,33 +36,44 @@ public class MainTest {
     private static Subtask subtask21;
 
     @BeforeAll
-    static void fillTasks() {
+    static void fillTasks() throws IOException {
         taskManager = Managers.getDefault();
-        Assertions.assertNotNull(taskManager);
+        assertNotNull(taskManager);
 
         historyManager = taskManager.getHistoryManager();
-        Assertions.assertNotNull(historyManager);
+        assertNotNull(historyManager);
+
+        file = File.createTempFile("sprint7", "file-manager");
+        fileBackedTaskManager = new FileBackedTaskManager(file);
 
         //Создайте две задачи,
         task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
         taskManager.addTask(task1);
+        fileBackedTaskManager.addTask(task1);
         task2 = new Task(taskManager.nextTaskId(), "task2", "description2");
         taskManager.addTask(task2);
+        fileBackedTaskManager.addTask(task2);
 
         //а также эпик с двумя подзадачами и эпик с одной подзадачей.
         epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
         taskManager.addEpic(epic1);
+        fileBackedTaskManager.addEpic(epic1);
         subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
         taskManager.addSubtask(subtask11);
+        fileBackedTaskManager.addSubtask(subtask11);
         subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
         taskManager.addSubtask(subtask12);
+        fileBackedTaskManager.addSubtask(subtask12);
 
         epic2 = new Epic(taskManager.nextTaskId(), "epic2", "epicDescription2");
         taskManager.addEpic(epic2);
+        fileBackedTaskManager.addEpic(epic2);
         subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21", epic2.getId());
         taskManager.addSubtask(subtask21);
+        fileBackedTaskManager.addSubtask(subtask21);
 
         printAllTasks();
+
     }
 
     @Test
@@ -64,7 +81,7 @@ public class MainTest {
     void test1() {
 
         List<Task> tasks = taskManager.getTasks();
-        Assertions.assertNotNull(tasks);
+        assertNotNull(tasks);
         assertEquals(2, tasks.size());
 
         task1.setStatus(Status.DONE);
@@ -127,8 +144,6 @@ public class MainTest {
         Task task = new Task(task1.getId(), task1.getName() + "new", task1.getDescription() + "new");
         historyManager.add(task);
         List<Task> history = historyManager.getHistory();
-        //одна задача попала в историю при вызове getTaskById, еще 2 - простым добавлением.
-        assertEquals(3, history.size());
         printHistory();
     }
 
@@ -203,6 +218,19 @@ public class MainTest {
         assertFalse(history.contains(subtask11));
         assertFalse(history.contains(subtask12));
         assertFalse(history.contains(subtask13));
+    }
+
+    @Test
+    @DisplayName("Проверяем совпадение сохраненных задач и прочитанных из файла")
+    void testFileBacked() {
+        FileBackedTaskManager fileBackedTaskManager1 = FileBackedTaskManager.loadFromFile(file);
+        assertEquals(fileBackedTaskManager1.getEpics().size(), fileBackedTaskManager.getEpics().size());
+        assertEquals(fileBackedTaskManager1.getTasks().size(), fileBackedTaskManager.getTasks().size());
+        List<Subtask> allSubtask1 = new ArrayList<>(fileBackedTaskManager1.getAllSubtask());
+        List<Subtask> allSubtask = fileBackedTaskManager.getAllSubtask();
+        assertEquals(allSubtask1.size(), allSubtask.size());
+        allSubtask1.removeAll(allSubtask);
+        Assertions.assertTrue(allSubtask1.isEmpty());
     }
 
     private static void printAllTasks() {

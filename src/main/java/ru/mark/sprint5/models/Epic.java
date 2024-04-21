@@ -90,17 +90,7 @@ public class Epic extends Task {
     @Override
     public String toString() {
         checkStatus();
-        List<String> subTaskStr = new ArrayList<>();
-        for (Subtask value : subtasks.values()) {
-            subTaskStr.add(value.toString());
-        }
-        return "Epic{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + getStatus() +
-                ", \nsubtasks=\n" + String.join("\n", subTaskStr) +
-                "\n}\n";
+        return id + ",EPIC," + name + ',' + status + ',' + description + ',';
     }
 
 }
