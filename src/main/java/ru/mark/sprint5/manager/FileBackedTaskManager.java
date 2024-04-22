@@ -33,32 +33,56 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             //Читаем заголовок. Впустую.
             String header = br.readLine();
+            // Количество пропущенных строк
+            int skipCount = 0;
+            int badCount = 0;
             while (br.ready()) {
                 //Читаем строку с описанием задачи, эпики и подзадачи.
                 String line = br.readLine();
-                String[] fields = line.split(",");
-                int id = Integer.parseInt(fields[0]);
-                String name = fields[2];
-                Status status = Status.valueOf(fields[3]);
-                String description = fields[4];
-                switch (fields[1]) {
-                    case "TASK":
-                        super.addTask(new Task(id,
-                                name,
-                                description,
-                                status));
-                        break;
-                    case "EPIC":
-                        super.addEpic(new Epic(id, name, description));
-                        break;
-                    case "SUBTASK":
-                        super.addSubtask(new Subtask(id,
-                                name,
-                                description,
-                                Integer.parseInt(fields[5]),
-                                status));
-                        break;
+                if (line == null || line.isEmpty()) {
+                    skipCount++;
+                    continue;
                 }
+                String[] fields = line.split(",");
+                if (fields.length < 5) {
+                    badCount++;
+                    continue;
+                }
+                //попытаемся прочитать хоть что-то.
+                try {
+                    //вдруг строка не число?
+                    int id = Integer.parseInt(fields[0]);
+                    String name = fields[2];
+                    //возможно, и здесь у нас какое-то неверное значение для enum.
+                    Status status = Status.valueOf(fields[3]);
+                    String description = fields[4];
+                    switch (fields[1]) {
+                        case "TASK":
+                            super.addTask(new Task(id,
+                                    name,
+                                    description,
+                                    status));
+                            break;
+                        case "EPIC":
+                            super.addEpic(new Epic(id, name, description));
+                            break;
+                        case "SUBTASK":
+                            super.addSubtask(new Subtask(id,
+                                    name,
+                                    description,
+                                    Integer.parseInt(fields[5]), //здесь тоже может выскочить Exception.
+                                    status));
+                            break;
+                    }
+                } catch (IllegalArgumentException ie) { //NumberFormatException extends IllegalArgumentException
+                    badCount++;
+                }
+            }
+            if (skipCount != 0) {
+                System.out.printf("При чтении файла было пропущено %d пустых строк. %n", skipCount);
+            }
+            if (badCount != 0) {
+                System.out.printf("При чтении файла было пропущено %d неформатных строк. %n", badCount);
             }
         } catch (IOException ex) {
             throw new ManagerSaveException(ex.getMessage(), ex);

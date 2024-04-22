@@ -13,7 +13,9 @@ import ru.mark.sprint5.models.Status;
 import ru.mark.sprint5.models.Subtask;
 import ru.mark.sprint5.models.Task;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -74,6 +76,14 @@ public class MainTest {
 
         printAllTasks();
 
+        //Доавим неформатные строки и попробуем прочитать.
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+            bw.write("\n"); //Добавим пустую строку
+            bw.write("ыоварыарщрео5489б497бывашигб4985овалыв\n"); //Добавим какую-то плохую строку
+        }
+        FileBackedTaskManager fromFile = FileBackedTaskManager.loadFromFile(file);
+        //количество подзадач совпадает, несмотря на кривые строки в файле
+        assertEquals(fromFile.getAllSubtask().size(), fileBackedTaskManager.getAllSubtask().size());
     }
 
     @Test
