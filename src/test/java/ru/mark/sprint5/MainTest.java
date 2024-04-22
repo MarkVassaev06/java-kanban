@@ -77,7 +77,7 @@ public class MainTest {
         printAllTasks();
 
         //Доавим неформатные строки и попробуем прочитать.
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
             bw.write("\n"); //Добавим пустую строку
             bw.write("ыоварыарщрео5489б497бывашигб4985овалыв\n"); //Добавим какую-то плохую строку
         }
