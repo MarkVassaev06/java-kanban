@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Задача.
  */
-public class Task {
+public class Task implements Comparable<Task> {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
@@ -38,17 +38,25 @@ public class Task {
      */
     protected LocalDateTime startTime;
 
-    public Task(int id, String name, String description, int minutes, LocalDateTime startTime) {
+    public Task(int id, String name, String description) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.duration = Duration.ofMinutes(minutes);
+        this.startTime = LocalDateTime.now();
+        this.duration = Duration.ZERO;
+    }
+
+    public Task(int id, String name, String description, LocalDateTime startTime, int minutes) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
         this.startTime = startTime;
+        this.duration = Duration.ofMinutes(minutes);
         status = Status.NEW;
     }
 
-    public Task(int id, String name, String description, int minutes, LocalDateTime startTime, Status status) {
-        this(id, name, description, minutes, startTime);
+    public Task(int id, String name, String description, Status status, LocalDateTime startTime, int minutes) {
+        this(id, name, description, startTime, minutes);
         this.status = status;
     }
 
@@ -87,6 +95,13 @@ public class Task {
         return startTime.plus(duration);
     }
 
+    /**
+     * Дата-время начала задачи.
+     */
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -94,12 +109,28 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%d, TASK. %s. $d минут. %s, %s, $s",
+        //представление в формате id,type,name,status,description,startTime,duration,epicId
+        return String.format("%d,TASK,%s,%s,%s,$s,%d,",
                 id,
-                startTime.format(DATE_TIME_FORMATTER),
-                duration.toMinutes(),
                 name,
                 status,
-                description);
+                description,
+                startTime.format(DATE_TIME_FORMATTER),
+                duration.toMinutes());
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    /**
+     * Для сортировки списка.
+     */
+    @Override
+    public int compareTo(Task o) {
+        if (o == null) {
+            return 1;
+        }
+        return startTime.compareTo(o.getStartTime());
     }
 }

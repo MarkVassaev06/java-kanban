@@ -15,10 +15,12 @@ public class InMemoryTaskManager implements TaskManager {
     private Map<Integer, Task> tasks;
     private Map<Integer, Epic> epics;
     private HistoryManager historyManager;
+    private TreeSet<Task> innerStructure;
 
     public InMemoryTaskManager() {
         tasks = new HashMap<>();
         epics = new HashMap<>();
+        innerStructure = new TreeSet<>();
         historyManager = Managers.getDefaultHistory();
     }
 
@@ -78,6 +80,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void removeAllTasks() {
+        innerStructure.removeAll(tasks.values());
         tasks.clear();
     }
 
@@ -86,6 +89,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public void removeAllEpics() {
+        for (Epic epic : epics.values()) {
+            innerStructure.removeAll(epic.getAllSubtasks());
+        }
         epics.clear();
     }
 
@@ -96,6 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllSubtasks() {
         for (Epic epic : epics.values()) {
             //здесь же происходит смена статуса эпики на NEW.
+            innerStructure.removeAll(epic.getAllSubtasks());
             epic.clearSubtasks();
         }
     }
@@ -107,6 +114,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllSubtasksFromEpic(int epicId) {
         Epic epic = getEpicById(epicId);
         if (epic != null) {
+            innerStructure.removeAll(epic.getAllSubtasks());
             epic.clearSubtasks();
         }
     }
@@ -153,6 +161,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void addTask(Task task) {
         tasks.put(task.getId(), task);
+        innerStructure.add(task);
     }
 
     /**
@@ -170,6 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void addEpic(Epic epic) {
         epics.put(epic.getId(), epic);
+        innerStructure.addAll(epic.getAllSubtasks());
     }
 
     /**
@@ -192,6 +202,7 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         } else {
             epic.addSubTasks(subtask);
+            innerStructure.add(subtask);
             return true;
         }
     }
@@ -210,7 +221,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public boolean removeTaskById(int taskId) {
-        return tasks.remove(taskId) != null;
+        Task task = tasks.remove(taskId);
+        innerStructure.remove(task);
+        return task != null;
     }
 
     /**
@@ -218,7 +231,9 @@ public class InMemoryTaskManager implements TaskManager {
      */
     @Override
     public boolean removeEpicById(int epicId) {
-        return epics.remove(epicId) != null;
+        Epic epic = epics.remove(epicId);
+        innerStructure.remove(epic);
+        return epic != null;
     }
 
     /**
@@ -229,11 +244,20 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : epics.values()) {
             Map<Integer, Subtask> subtasks = epic.getSubtasks();
             if (subtasks.containsKey(subtaskId)) {
-                epic.removeSubtask(subtaskId);
+                Subtask subtask = epic.removeSubtask(subtaskId);
+                innerStructure.remove(subtask);
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Task> getPrioritizedTasks() {
+        return innerStructure;
     }
 
 }

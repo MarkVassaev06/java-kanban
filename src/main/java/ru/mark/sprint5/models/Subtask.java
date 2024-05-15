@@ -10,13 +10,24 @@ public class Subtask extends Task {
     //Для каждой подзадачи известно, в рамках какого эпика она выполняется.
     private final int epicId;
 
-    public Subtask(int id, String name, String description, int minutes, LocalDateTime startTime, int epicId) {
-        super(id, name, description, minutes, startTime);
+    public Subtask(int id,
+                   String name,
+                   String description,
+                   LocalDateTime startTime,
+                   int minutes,
+                   int epicId) {
+        super(id, name, description, startTime, minutes);
         this.epicId = epicId;
     }
 
-    public Subtask(int id, String name, String description, int minutes, LocalDateTime startTime, int epicId, Status status) {
-        this(id, name, description, minutes, startTime, epicId);
+    public Subtask(int id,
+                   String name,
+                   String description,
+                   Status status,
+                   LocalDateTime startTime,
+                   int minutes,
+                   int epicId) {
+        this(id, name, description, startTime, minutes, epicId);
         this.status = status;
     }
 
@@ -26,13 +37,14 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return String.format("%d, SUBTASK. %s. $d минут. %s, %s, $s. %d",
+        //представление в формате id,type,name,status,description,startTime,duration,epicId
+        return String.format("%d,SUBTASK,%s,%s,%s,$s,%d,%d",
                 id,
-                startTime.format(DATE_TIME_FORMATTER),
-                duration.toMinutes(),
                 name,
                 status,
                 description,
+                startTime.format(DATE_TIME_FORMATTER),
+                duration.toMinutes(),
                 epicId);
     }
 }

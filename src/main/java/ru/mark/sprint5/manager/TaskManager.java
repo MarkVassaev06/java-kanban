@@ -4,6 +4,7 @@ import ru.mark.sprint5.models.Epic;
 import ru.mark.sprint5.models.Subtask;
 import ru.mark.sprint5.models.Task;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -142,4 +143,9 @@ public interface TaskManager {
      * @param subtaskId id подзадачи
      */
     boolean removeSubtaskById(int subtaskId);
+
+    /**
+     * Список задач, отсортированный по startTime.
+     */
+    Collection<Task> getPrioritizedTasks();
 }

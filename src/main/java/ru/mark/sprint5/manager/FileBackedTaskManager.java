@@ -6,8 +6,11 @@ import ru.mark.sprint5.models.Subtask;
 import ru.mark.sprint5.models.Task;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ru.mark.sprint5.models.Task.DATE_TIME_FORMATTER;
 
 /**
  * Файловый менеджер задач.
@@ -49,6 +52,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     continue;
                 }
                 //попытаемся прочитать хоть что-то.
+                //представление в формате id,type,name,status,description,startTime,duration,epicId
                 try {
                     //вдруг строка не число?
                     int id = Integer.parseInt(fields[0]);
@@ -56,12 +60,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     //возможно, и здесь у нас какое-то неверное значение для enum.
                     Status status = Status.valueOf(fields[3]);
                     String description = fields[4];
+                    String startTimeStr = fields[6];
+                    LocalDateTime startTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(startTimeStr));
+                    String durationStr = fields[7];
+                    int ofMinutes = Integer.parseInt(durationStr);
                     switch (fields[1]) {
                         case "TASK":
                             super.addTask(new Task(id,
                                     name,
                                     description,
-                                    status));
+                                    status,
+                                    startTime,
+                                    ofMinutes));
                             break;
                         case "EPIC":
                             super.addEpic(new Epic(id, name, description));
@@ -70,8 +80,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                             super.addSubtask(new Subtask(id,
                                     name,
                                     description,
-                                    Integer.parseInt(fields[5]), //здесь тоже может выскочить Exception.
-                                    status));
+                                    status,
+                                    startTime,
+                                    ofMinutes,
+                                    Integer.parseInt(fields[5]) //здесь тоже может выскочить Exception.
+                            ));
                             break;
                     }
                 } catch (IllegalArgumentException ie) { //NumberFormatException extends IllegalArgumentException
@@ -95,7 +108,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         allTasks.addAll(getAllSubtask());
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-            bw.write("id,type,name,status,description,epic\n");
+            bw.write("id,type,name,status,description,startTime,duration,epic\n");
             for (Task task : allTasks) {
                 bw.write(task.toString() + "\n");
             }
