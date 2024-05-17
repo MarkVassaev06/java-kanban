@@ -110,7 +110,7 @@ public class Task implements Comparable<Task> {
     @Override
     public String toString() {
         //представление в формате id,type,name,status,description,startTime,duration,epicId
-        return String.format("%d,TASK,%s,%s,%s,$s,%d,",
+        return String.format("%d,TASK,%s,%s,%s,%s,%d, ",
                 id,
                 name,
                 status,

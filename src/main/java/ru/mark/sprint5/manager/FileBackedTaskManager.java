@@ -60,10 +60,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     //возможно, и здесь у нас какое-то неверное значение для enum.
                     Status status = Status.valueOf(fields[3]);
                     String description = fields[4];
-                    String startTimeStr = fields[6];
-                    LocalDateTime startTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(startTimeStr));
-                    String durationStr = fields[7];
-                    int ofMinutes = Integer.parseInt(durationStr);
+                    String startTimeStr = fields[5];
+                    LocalDateTime startTime = null;
+                    int ofMinutes = -1;
+                    //У эпики дата начала и длитиельность - вычисляемые значения.
+                    if (!fields[1].equals("EPIC")) {
+                        startTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(startTimeStr));
+                        String durationStr = fields[6];
+                        ofMinutes = Integer.parseInt(durationStr);
+                    }
+
                     switch (fields[1]) {
                         case "TASK":
                             super.addTask(new Task(id,
@@ -83,7 +89,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                                     status,
                                     startTime,
                                     ofMinutes,
-                                    Integer.parseInt(fields[5]) //здесь тоже может выскочить Exception.
+                                    Integer.parseInt(fields[7]) //здесь тоже может выскочить Exception.
                             ));
                             break;
                     }

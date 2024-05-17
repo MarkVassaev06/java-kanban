@@ -157,13 +157,11 @@ public class Epic extends Task {
     public String toString() {
         checkStatus();
         //представление в формате id,type,name,status,description,startTime,duration,epicId
-        return String.format("%d,SUBTASK,%s,%s,%s,$s,%d,",
+        return String.format("%d,EPIC,%s,%s,%s, , , ",
                 id,
                 name,
                 status,
-                description,
-                getStartTime().format(DATE_TIME_FORMATTER),
-                getDuration().toMinutes());
+                description);
     }
 
 }
