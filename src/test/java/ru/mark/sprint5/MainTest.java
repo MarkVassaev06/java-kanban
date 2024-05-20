@@ -110,6 +110,7 @@ public class MainTest {
             bw.write("\n"); //Добавим пустую строку
             bw.write("ыоварыарщрео5489б497бывашигб4985овалыв\n"); //Добавим какую-то плохую строку
         }
+
         FileBackedTaskManager fromFile = FileBackedTaskManager.loadFromFile(file);
         //количество подзадач совпадает, несмотря на кривые строки в файле
         assertEquals(fromFile.getAllSubtask().size(), fileBackedTaskManager.getAllSubtask().size());

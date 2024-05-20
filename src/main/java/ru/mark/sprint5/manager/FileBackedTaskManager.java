@@ -33,12 +33,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
      * Загрузка данных из файла.
      */
     private void innerLoad() {
+        int totalCount = 0;
+        // Количество пропущенных строк.
+        int skipCount = 0;
+        // Количество неформатных строк.
+        int badCount = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             //Читаем заголовок. Впустую.
-            String header = br.readLine();
-            // Количество пропущенных строк
-            int skipCount = 0;
-            int badCount = 0;
+            if (br.ready()) {
+                br.readLine();
+            }
+
             while (br.ready()) {
                 //Читаем строку с описанием задачи, эпики и подзадачи.
                 String line = br.readLine();
@@ -52,47 +57,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     continue;
                 }
                 //попытаемся прочитать хоть что-то.
-                //представление в формате id,type,name,status,description,startTime,duration,epicId
                 try {
-                    //вдруг строка не число?
-                    int id = Integer.parseInt(fields[0]);
-                    String name = fields[2];
-                    //возможно, и здесь у нас какое-то неверное значение для enum.
-                    Status status = Status.valueOf(fields[3]);
-                    String description = fields[4];
-                    String startTimeStr = fields[5];
-                    LocalDateTime startTime = null;
-                    int ofMinutes = -1;
-                    //У эпики дата начала и длитиельность - вычисляемые значения.
-                    if (!fields[1].equals("EPIC")) {
-                        startTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(startTimeStr));
-                        String durationStr = fields[6];
-                        ofMinutes = Integer.parseInt(durationStr);
-                    }
-
-                    switch (fields[1]) {
-                        case "TASK":
-                            super.addTask(new Task(id,
-                                    name,
-                                    description,
-                                    status,
-                                    startTime,
-                                    ofMinutes));
-                            break;
-                        case "EPIC":
-                            super.addEpic(new Epic(id, name, description));
-                            break;
-                        case "SUBTASK":
-                            super.addSubtask(new Subtask(id,
-                                    name,
-                                    description,
-                                    status,
-                                    startTime,
-                                    ofMinutes,
-                                    Integer.parseInt(fields[7]) //здесь тоже может выскочить Exception.
-                            ));
-                            break;
-                    }
+                    readLine(fields);
                 } catch (IllegalArgumentException ie) { //NumberFormatException extends IllegalArgumentException
                     badCount++;
                 }
@@ -105,6 +71,58 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         } catch (IOException ex) {
             throw new ManagerSaveException(ex.getMessage(), ex);
+        }
+        if (totalCount == 0) {
+            throw new ManagerSaveException("Файл загрузки пустой.");
+        }
+        if (totalCount == skipCount + badCount) {
+            throw new ManagerSaveException("Файл загрузки целиком состоит из некорректных данных.");
+        }
+    }
+
+    private void readLine(String[] fields) {
+        //представление в формате id,type,name,status,description,startTime,duration,epicId
+
+        //вдруг строка не число?
+        int id = Integer.parseInt(fields[0]);
+        String name = fields[2];
+        //возможно, и здесь у нас какое-то неверное значение для enum.
+        Status status = Status.valueOf(fields[3]);
+        String description = fields[4];
+        String startTimeStr = fields[5];
+        LocalDateTime startTime = null;
+        int ofMinutes = -1;
+        //У эпики дата начала и длитиельность - вычисляемые значения.
+        if (!fields[1].equals("EPIC")) {
+            startTime = LocalDateTime.from(DATE_TIME_FORMATTER.parse(startTimeStr));
+            String durationStr = fields[6];
+            ofMinutes = Integer.parseInt(durationStr);
+        }
+
+        switch (fields[1]) {
+            case "TASK":
+                super.addTask(new Task(id,
+                        name,
+                        description,
+                        status,
+                        startTime,
+                        ofMinutes));
+                break;
+            case "EPIC":
+                super.addEpic(new Epic(id, name, description));
+                break;
+            case "SUBTASK":
+                super.addSubtask(new Subtask(id,
+                        name,
+                        description,
+                        status,
+                        startTime,
+                        ofMinutes,
+                        Integer.parseInt(fields[7]) //здесь тоже может выскочить Exception.
+                ));
+                break;
+            default:
+                //skip
         }
     }
 
