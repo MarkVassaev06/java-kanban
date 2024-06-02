@@ -17,12 +17,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MainTest {
 
+    public static final int minutesPerTask = 30;
     private static TaskManager taskManager;
     private static HistoryManager historyManager;
 
@@ -48,39 +50,67 @@ public class MainTest {
         file = File.createTempFile("sprint7", "file-manager");
         fileBackedTaskManager = new FileBackedTaskManager(file);
 
+        LocalDateTime now = LocalDateTime.now();
+
         //Создайте две задачи,
-        task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
+        task1 = new Task(taskManager.nextTaskId(),
+                "task1",
+                "description1",
+                now,
+                minutesPerTask - 1); //с перерывом на обед в 1 минуту)
         taskManager.addTask(task1);
         fileBackedTaskManager.addTask(task1);
-        task2 = new Task(taskManager.nextTaskId(), "task2", "description2");
+        task2 = new Task(taskManager.nextTaskId(),
+                "task2",
+                "description2",
+                now.plusMinutes(minutesPerTask),
+                minutesPerTask - 1);
         taskManager.addTask(task2);
         fileBackedTaskManager.addTask(task2);
 
+        now = now.plusMinutes(2 * minutesPerTask);
         //а также эпик с двумя подзадачами и эпик с одной подзадачей.
         epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
         taskManager.addEpic(epic1);
         fileBackedTaskManager.addEpic(epic1);
-        subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
+        subtask11 = new Subtask(taskManager.nextTaskId(),
+                "subtask11",
+                "subtaskDescription11",
+                now,
+                minutesPerTask - 1,
+                epic1.getId());
         taskManager.addSubtask(subtask11);
         fileBackedTaskManager.addSubtask(subtask11);
-        subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
+        subtask12 = new Subtask(taskManager.nextTaskId(),
+                "subtask12",
+                "subtaskDescription12",
+                now.plusMinutes(minutesPerTask),
+                minutesPerTask - 1,
+                epic1.getId());
         taskManager.addSubtask(subtask12);
         fileBackedTaskManager.addSubtask(subtask12);
 
+        now = now.plusMinutes(2 * minutesPerTask);
         epic2 = new Epic(taskManager.nextTaskId(), "epic2", "epicDescription2");
         taskManager.addEpic(epic2);
         fileBackedTaskManager.addEpic(epic2);
-        subtask21 = new Subtask(taskManager.nextTaskId(), "subtask21", "subtaskDescription21", epic2.getId());
+        subtask21 = new Subtask(taskManager.nextTaskId(),
+                "subtask21",
+                "subtaskDescription21",
+                now,
+                minutesPerTask - 1,
+                epic2.getId());
         taskManager.addSubtask(subtask21);
         fileBackedTaskManager.addSubtask(subtask21);
 
         printAllTasks();
 
-        //Доавим неформатные строки и попробуем прочитать.
+        //Добавим неформатные строки и попробуем прочитать.
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
             bw.write("\n"); //Добавим пустую строку
             bw.write("ыоварыарщрео5489б497бывашигб4985овалыв\n"); //Добавим какую-то плохую строку
         }
+
         FileBackedTaskManager fromFile = FileBackedTaskManager.loadFromFile(file);
         //количество подзадач совпадает, несмотря на кривые строки в файле
         assertEquals(fromFile.getAllSubtask().size(), fileBackedTaskManager.getAllSubtask().size());
@@ -124,9 +154,9 @@ public class MainTest {
         Epic e1 = new Epic(2, "e1", "d1");
         Epic e2 = new Epic(2, "e2", "d2");
         assertEquals(e1, e2);
-
-        Subtask s1 = new Subtask(1, "s1", "d1", 1);
-        Subtask s2 = new Subtask(1, "s2", "d2", 2);
+        LocalDateTime now = LocalDateTime.now();
+        Subtask s1 = new Subtask(1, "s1", "d1", now, 1, 1);
+        Subtask s2 = new Subtask(1, "s2", "d2", now, 2, 2);
         assertEquals(s1, s2);
     }
 
@@ -151,7 +181,9 @@ public class MainTest {
         assertEquals(task1.getStatus(), taskById.getStatus());
 
         historyManager.add(task1);
-        Task task = new Task(task1.getId(), task1.getName() + "new", task1.getDescription() + "new");
+        Task task = new Task(task1.getId(),
+                task1.getName() + "new",
+                task1.getDescription() + "new");
         historyManager.add(task);
         List<Task> history = historyManager.getHistory();
         printHistory();
@@ -172,21 +204,46 @@ public class MainTest {
         taskManager = Managers.getDefault();
         historyManager = taskManager.getHistoryManager();
 
+        LocalDateTime now = LocalDateTime.now();
         //1. Создайте две задачи, эпик с тремя подзадачами и эпик без подзадач.
         //Создайте две задачи,
-        Task task1 = new Task(taskManager.nextTaskId(), "task1", "description1");
+        Task task1 = new Task(taskManager.nextTaskId(),
+                "task1",
+                "description1",
+                now,
+                minutesPerTask - 1);
         taskManager.addTask(task1);
-        Task task2 = new Task(taskManager.nextTaskId(), "task2", "description2");
+        Task task2 = new Task(taskManager.nextTaskId(),
+                "task2",
+                "description2",
+                now.plusMinutes(minutesPerTask),
+                minutesPerTask - 1);
         taskManager.addTask(task2);
 
+        now = now.plusMinutes(minutesPerTask * 2);
         //эпик с тремя подзадачами
         Epic epic1 = new Epic(taskManager.nextTaskId(), "epic1", "epicDescription1");
         taskManager.addEpic(epic1);
-        Subtask subtask11 = new Subtask(taskManager.nextTaskId(), "subtask11", "subtaskDescription11", epic1.getId());
+        Subtask subtask11 = new Subtask(taskManager.nextTaskId(),
+                "subtask11",
+                "subtaskDescription11",
+                now,
+                minutesPerTask - 1,
+                epic1.getId());
         taskManager.addSubtask(subtask11);
-        Subtask subtask12 = new Subtask(taskManager.nextTaskId(), "subtask12", "subtaskDescription12", epic1.getId());
+        Subtask subtask12 = new Subtask(taskManager.nextTaskId(),
+                "subtask12",
+                "subtaskDescription12",
+                now.plusMinutes(minutesPerTask),
+                minutesPerTask - 1,
+                epic1.getId());
         taskManager.addSubtask(subtask12);
-        Subtask subtask13 = new Subtask(taskManager.nextTaskId(), "subtask13", "subtaskDescription13", epic1.getId());
+        Subtask subtask13 = new Subtask(taskManager.nextTaskId(),
+                "subtask13",
+                "subtaskDescription13",
+                now.plusMinutes(minutesPerTask * 2),
+                minutesPerTask,
+                epic1.getId());
         taskManager.addSubtask(subtask13);
 
         //эпик без подзадач.
